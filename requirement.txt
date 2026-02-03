@@ -5,3 +5,5 @@ pandas
 kagglehub
 catboost
 torch
+torchvision
+Pillow
