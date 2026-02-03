@@ -3,6 +3,10 @@ import torch.nn as nn
 import torch.optim as optim
 
 # 1. 데이터 정의 (소 마리 수 -> 사료 kg)
+"""
+pytorch model은 tensor type만 입력 받을수 있어요
+그래서 tensor로 변환한것 뿐이에요.
+"""
 x_train = torch.FloatTensor([[1], [2], [3], [4], [5]])
 y_train = torch.FloatTensor([[12], [22], [32], [42], [52]])
 
@@ -25,7 +29,7 @@ optimizer = optim.Adam(model.parameters(), lr=0.01)
 
 # 4. 학습 시작
 print("--- 딥러닝 학습 시작 ---")
-for epoch in range(3001): # 층이 깊어지면 학습이 더 오래 걸립니다 (2000 -> 3000)
+for epoch in range(400): # 층이 깊어지면 학습이 더 오래 걸립니다 (2000 -> 3000)
     prediction = model(x_train)
     loss = torch.mean((prediction - y_train) ** 2)
 
@@ -33,7 +37,7 @@ for epoch in range(3001): # 층이 깊어지면 학습이 더 오래 걸립니�
     loss.backward()
     optimizer.step()
 
-    if epoch % 500 == 0:
+    if epoch % 10 == 0:
         print(f"Epoch {epoch} Loss: {loss.item():.5f}")
 
 # 5. 결과 확인
