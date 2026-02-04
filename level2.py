@@ -65,6 +65,7 @@ x_mean, x_std = x_data.mean(dim=0), x_data.std(dim=0)
 y_mean, y_std = y_data.mean(), y_data.std()
 
 x_train = (x_data - x_mean) / x_std
+print(f"x_train: {x_train[0:10]}")
 y_train = (y_data - y_mean) / y_std
 
 # 4. 모델 정의 (은닉층이 있는 신경망)
