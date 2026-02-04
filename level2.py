@@ -24,6 +24,7 @@ df = pd.DataFrame({
     'Education': edu,
     'Salary': salary
 })
+print(df.head())
 
 # 2. EDA (데이터 시각화)
 print("--- EDA 시작 ---")
