@@ -1,0 +1,4 @@
+https://colab.research.google.com/drive/1FH5E0nlpBicZj5A811KoOqYC8IUQFeg-?usp=sharing
+
+https://colab.research.google.com/drive/1Nd8ULsTJrB0JLqd89DZJLPVPsWBSNbEE?usp=sharing
+- efficentnet finetuning
