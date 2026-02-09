@@ -61,3 +61,218 @@ other_insect 얘는 dataset/other_insect로 합쳐주고
 -------------------------
 
 학습용(train)과 검증용(val) 폴더로 나누는 작업을 진행
+
+
+--------------------------
+
+
+import os
+import torch
+from torchvision import datasets, transforms
+from torch.utils.data import DataLoader
+
+# 1. 경로 설정
+data_dir = os.path.join(os.getcwd(), "dataset")
+
+# 2. 이미지 전처리 설정 (Transforms)
+# 학습용은 데이터 증강(Augmentation)을 약간 주고, 검증용은 그대로 둡니다.
+data_transforms = {
+    'train': transforms.Compose([
+        transforms.Resize((224, 224)),        # 모델 입력을 위한 크기 조절 (일반적으로 224)
+        transforms.RandomHorizontalFlip(),    # 좌우 반전 (학습 데이터 늘리기 효과)
+        transforms.ToTensor(),                # 이미지를 텐서(0~1)로 변환
+        transforms.Normalize([0.485, 0.456, 0.406], 
+                             [0.229, 0.224, 0.225]) # ImageNet 정규화 표준값
+    ]),
+    'val': transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], 
+                             [0.229, 0.224, 0.225])
+    ]),
+}
+
+# 3. ImageFolder로 데이터셋 불러오기
+image_datasets = {
+    x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x])
+    for x in ['train', 'val']
+}
+
+# 4. DataLoader로 배치 만들기 (학습용은 섞기(Shuffle) 필수)
+dataloaders = {
+    x: DataLoader(image_datasets[x], batch_size=32, shuffle=(x == 'train'), num_workers=2)
+    for x in ['train', 'val']
+}
+
+# 5. 데이터셋 정보 확인
+class_names = image_datasets['train'].classes
+dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
+
+print("✅ 데이터 로딩 완료!")
+print(f"📌 클래스 목록: {class_names}")
+print(f"📌 데이터 개수: {dataset_sizes}")
+
+# --- 잘 불러와졌는지 배치 하나만 꺼내서 확인 ---
+inputs, classes = next(iter(dataloaders['train']))
+print(f"📦 배치(Batch) 형태 확인 - 이미지: {inputs.shape}, 라벨: {classes.shape}")
+
+내가 efficientnetv2-s 이걸로 나중에 이미지 분류 할건데, 설정 맞는거냐?
+bee or wasp 구분용 데이터 증강도 맞는거냐?
+
+
+-----------------------
+
+
+
+아냐아냐. crop 하지마. efficientnetv2-s 의 권장 이미지 사이즈로 가야해.
+
+왜 crop을 안하는지 알아?
+실제 사진에서 bee가 center에 있다는 보장이 있어?
+
+
+------------------------
+
+
+이제 efficientnetv2-s 를 이용해서 모델 훈련하는 코드 줘.
+
+결과를 0,1,2 이렇게 보면 모르니깐 class 이름도 같이 저장되게 해줘.
+
+
+----------------------------
+
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torchvision.models import efficientnet_v2_s, EfficientNet_V2_S_Weights
+import time
+import copy
+
+# 1. 디바이스 설정 (GPU 권장)
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+print(f"🚀 학습 장치: {device}")
+
+# 2. 모델 불러오기 (Pre-trained Weights 사용)
+print("🏗️ EfficientNetV2-S 모델 로딩 중...")
+weights = EfficientNet_V2_S_Weights.DEFAULT
+model = efficientnet_v2_s(weights=weights)
+
+# 3. 분류기(Classifier) 교체
+# 원래 EfficientNet은 1000개의 클래스를 출력하지만, 우리는 3개(bee, wasp, other)가 필요함
+num_ftrs = model.classifier[1].in_features
+class_names = image_datasets['train'].classes # ['bee', 'other_insect', 'wasp']
+
+# 마지막 레이어를 우리 데이터셋에 맞게 수정
+model.classifier[1] = nn.Linear(num_ftrs, len(class_names))
+
+model = model.to(device)
+
+# 4. 손실함수 및 최적화 기법 설정
+criterion = nn.CrossEntropyLoss()
+
+# 파인튜닝(Fine-tuning)이므로 학습률(lr)을 낮게 잡습니다 (0.0001 추천)
+optimizer = optim.Adam(model.parameters(), lr=1e-4)
+
+# 5. 학습 함수 정의
+def train_model(model, criterion, optimizer, num_epochs=10):
+    since = time.time()
+
+    best_model_wts = copy.deepcopy(model.state_dict())
+    best_acc = 0.0
+
+    print(f"\n🔥 학습 시작 (총 {num_epochs} Epochs)")
+    print("-" * 20)
+
+    for epoch in range(num_epochs):
+        print(f'Epoch {epoch+1}/{num_epochs}')
+        
+        # 각 에포크마다 학습(train)과 검증(val) 단계 진행
+        for phase in ['train', 'val']:
+            if phase == 'train':
+                model.train()  # 모델을 학습 모드로 설정
+            else:
+                model.eval()   # 모델을 평가 모드로 설정
+
+            running_loss = 0.0
+            running_corrects = 0
+
+            # 데이터 반복 (Batch 단위)
+            for inputs, labels in dataloaders[phase]:
+                inputs = inputs.to(device)
+                labels = labels.to(device)
+
+                optimizer.zero_grad() # 기울기 초기화
+
+                # 순전파 (Forward)
+                with torch.set_grad_enabled(phase == 'train'):
+                    outputs = model(inputs)
+                    _, preds = torch.max(outputs, 1)
+                    loss = criterion(outputs, labels)
+
+                    # 역전파 (Backward) - 학습 단계에서만
+                    if phase == 'train':
+                        loss.backward()
+                        optimizer.step()
+
+                # 통계 계산
+                running_loss += loss.item() * inputs.size(0)
+                running_corrects += torch.sum(preds == labels.data)
+
+            epoch_loss = running_loss / dataset_sizes[phase]
+            epoch_acc = running_corrects.double() / dataset_sizes[phase]
+
+            print(f'  {phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}')
+
+            # 검증 정확도가 높으면 모델 저장 (Best Model 갱신)
+            if phase == 'val' and epoch_acc > best_acc:
+                best_acc = epoch_acc
+                best_model_wts = copy.deepcopy(model.state_dict())
+                print(f"    ✨ 최고 성능 갱신! (Acc: {best_acc:.4f})")
+
+        print()
+
+    time_elapsed = time.time() - since
+    print(f'⏱️ 학습 완료: {time_elapsed // 60:.0f}분 {time_elapsed % 60:.0f}초 소요')
+    print(f'🏆 최고 검증 정확도: {best_acc:.4f}')
+
+    # 최고 성능 모델 가중치 로드
+    model.load_state_dict(best_model_wts)
+    return model
+
+# 6. 학습 실행 (예: 5 Epoch만 테스트로 돌려봄)
+# GPU가 없다면 num_epochs를 1로 줄이세요. 시간이 오래 걸립니다.
+trained_model = train_model(model, criterion, optimizer, num_epochs=5)
+
+# 7. 모델 및 클래스 정보 저장
+save_path = 'bee_wasp_efficientnetv2.pth'
+print(f"\n💾 모델 저장 중... ({save_path})")
+
+torch.save({
+    'model_state_dict': trained_model.state_dict(),
+    'class_names': class_names,  # 여기에 클래스 이름 리스트를 같이 저장함!
+    'input_size': 384            # 나중에 참고하려고 입력 크기도 저장
+}, save_path)
+
+print("✅ 저장 완료. 이제 나중에 불러올 때 0,1,2 대신 이름을 알 수 있습니다.")
+
+
+이거 훈련중에 train acc val acc 다 나오는거야?
+
+
+--------------------
+
+
+
+# 7. 모델 및 클래스 정보 저장
+save_path = 'bee_wasp_efficientnetv2.pth'
+print(f"\n💾 모델 저장 중... ({save_path})")
+
+torch.save({
+    'model_state_dict': trained_model.state_dict(),
+    'class_names': class_names,  # 여기에 클래스 이름 리스트를 같이 저장함!
+    'input_size': 384            # 나중에 참고하려고 입력 크기도 저장
+}, save_path)
+
+print("✅ 저장 완료. 이제 나중에 불러올 때 0,1,2 대신 이름을 알 수 있습니다.")
+
+이거 최종모델 내가 정한 google drive 에 저장하고 싶은데 어캐함?
