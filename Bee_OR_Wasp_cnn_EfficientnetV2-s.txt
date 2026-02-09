@@ -3,3 +3,28 @@ from google.colab import drive
 # Google Drive를 '/content/drive' 경로에 마운트합니다.
 drive.mount('/content/drive')
 
+
+import kagglehub
+import shutil
+import os
+
+# 1. 목적지 경로 설정 (현재 프로젝트 경로/dataset)
+target_path = os.path.join(os.getcwd(), "dataset")
+
+# 2. 데이터셋 폴더가 이미 있는지 확인
+if os.path.exists(target_path):
+    print(f"✅ 알림: '{target_path}' 폴더가 이미 존재합니다.")
+    print("다운로드를 건너뜁니다.")
+else:
+    print("📥 데이터셋 다운로드를 시작합니다...")
+    try:
+        # 다운로드 (캐시 경로에 저장됨)
+        tmp_path = kagglehub.dataset_download("jerzydziewierz/bee-vs-wasp")
+        print(f"임시 저장 경로: {tmp_path}")
+
+        # 이동 (임시 경로 -> 목적지 경로)
+        shutil.move(tmp_path, target_path)
+        print(f"✅ 성공: 데이터를 {target_path}로 이동했습니다.")
+        
+    except Exception as e:
+        print(f"❌ 오류 발생: {e}")
