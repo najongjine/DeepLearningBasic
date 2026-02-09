@@ -1,0 +1,5 @@
+from google.colab import drive
+
+# Google Drive를 '/content/drive' 경로에 마운트합니다.
+drive.mount('/content/drive')
+
