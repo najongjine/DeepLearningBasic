@@ -1,3 +1,6 @@
+https://colab.research.google.com/drive/1Nd8ULsTJrB0JLqd89DZJLPVPsWBSNbEE?usp=sharing
+
+
 !pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121  # GPU(쿠다)면
 # CPU만이면:
 # pip install torch torchvision torchaudio
