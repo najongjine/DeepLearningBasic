@@ -144,3 +144,72 @@ for cls in classes:
         print(f"   ℹ️ 알림: {src_dir} 폴더에 잔여 파일이 있어 삭제하지 않았습니다.")
 
 print("✅ 모든 작업 완료! 데이터셋이 Train/Val로 분리되었습니다.")
+
+
+
+
+import os
+import torch
+from torchvision import datasets, transforms
+from torch.utils.data import DataLoader
+
+# 1. 경로 설정
+data_dir = os.path.join(os.getcwd(), "dataset")
+
+# EfficientNetV2-S 권장 입력 사이즈 (384 추천)
+IMG_SIZE = 384
+
+# 2. 이미지 전처리 설정 (Transforms)
+data_transforms = {
+    'train': transforms.Compose([
+        # [중요] Crop을 제거하고 강제 리사이즈 (비율 파괴 감수하더라도 객체 보존 우선)
+        transforms.Resize((IMG_SIZE, IMG_SIZE)),
+        
+        # 기하학적 증강
+        transforms.RandomHorizontalFlip(),    # 좌우 반전
+        transforms.RandomVerticalFlip(p=0.5), # 상하 반전 (곤충은 위아래가 바뀐 사진도 많음)
+        transforms.RandomRotation(degrees=15),# 회전
+        
+        # 색상 증강 (조명 변화 대응)
+        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
+        
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], 
+                             [0.229, 0.224, 0.225])
+    ]),
+    
+    'val': transforms.Compose([
+        # 검증용도 자르지 않고 전체를 리사이즈해서 평가
+        transforms.Resize((IMG_SIZE, IMG_SIZE)),
+        
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], 
+                             [0.229, 0.224, 0.225])
+    ]),
+}
+
+# 3. ImageFolder로 데이터셋 불러오기
+image_datasets = {
+    x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x])
+    for x in ['train', 'val']
+}
+
+# 4. DataLoader 설정
+# 이미지 사이즈가 커졌으므로(224->384), 메모리 에러가 나면 batch_size를 32 -> 16으로 줄이세요.
+batch_size = 32 
+
+dataloaders = {
+    x: DataLoader(image_datasets[x], batch_size=batch_size, shuffle=(x == 'train'), num_workers=2)
+    for x in ['train', 'val']
+}
+
+class_names = image_datasets['train'].classes
+dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
+
+print(f"✅ 설정 완료: Input Size ({IMG_SIZE}x{IMG_SIZE})")
+print(f"📌 클래스: {class_names}")
+print(f"📌 데이터 수: {dataset_sizes}")
+
+# --- 배치 확인 ---
+inputs, classes = next(iter(dataloaders['train']))
+print(f"📦 Batch Shape: {inputs.shape}") # 예상: [32, 3, 384, 384]
