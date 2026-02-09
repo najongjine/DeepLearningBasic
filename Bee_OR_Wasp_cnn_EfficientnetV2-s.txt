@@ -1,3 +1,9 @@
+!pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121  # GPU(쿠다)면
+# CPU만이면:
+# pip install torch torchvision torchaudio
+
+
+
 from google.colab import drive
 
 # Google Drive를 '/content/drive' 경로에 마운트합니다.
