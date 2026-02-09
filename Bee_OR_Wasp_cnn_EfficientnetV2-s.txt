@@ -28,3 +28,113 @@ else:
         
     except Exception as e:
         print(f"❌ 오류 발생: {e}")
+
+
+import os
+import shutil
+
+# 1. 경로 설정
+base_path = os.path.join(os.getcwd(), "dataset")
+source_root = os.path.join(base_path, "kaggle_bee_vs_wasp") # 이미지에 보이는 내부 폴더
+
+# 이동 규칙 정의 (목표 폴더명 : [가져올 소스 폴더 리스트])
+move_rules = {
+    "bee": ["bee1", "bee2"],
+    "wasp": ["wasp1", "wasp2"],
+    "other_insect": ["other_insect"]
+}
+
+print("📂 데이터셋 정리 시작...")
+
+# 2. 파일 이동 로직
+for target_name, source_list in move_rules.items():
+    # 목표 폴더 생성 (예: dataset/bee)
+    target_dir = os.path.join(base_path, target_name)
+    os.makedirs(target_dir, exist_ok=True)
+    
+    count = 0
+    for source_name in source_list:
+        source_dir = os.path.join(source_root, source_name)
+        
+        # 소스 폴더가 있는지 확인
+        if os.path.exists(source_dir):
+            files = os.listdir(source_dir)
+            for file_name in files:
+                src_file = os.path.join(source_dir, file_name)
+                dst_file = os.path.join(target_dir, file_name)
+                
+                # 파일 이동
+                shutil.move(src_file, dst_file)
+                count += 1
+            
+            # 다 옮긴 빈 소스 폴더 삭제 (선택사항)
+            try:
+                os.rmdir(source_dir)
+            except:
+                pass # 비어있지 않으면 패스
+                
+    print(f"✅ '{target_name}' 폴더로 {count}개 파일 이동 완료.")
+
+# 3. (옵션) 껍데기만 남은 kaggle_bee_vs_wasp 폴더 정리
+# 필요 없으시면 아래 주석을 해제하여 삭제하세요
+# shutil.rmtree(source_root) 
+
+print("🎉 전체 정리 완료!")
+
+
+
+# 데이터셋 분할 코드 (Train/Val Split)
+
+import os
+import shutil
+import random
+
+# 1. 설정
+base_path = os.path.join(os.getcwd(), "dataset")
+classes = ["bee", "wasp", "other_insect"]
+val_ratio = 0.2  # 검증 데이터 비율 (20%)
+
+# 랜덤 시드 고정 (매번 똑같이 섞이도록 - 재현성 확보)
+random.seed(42)
+
+print(f"🔄 데이터 분할 시작 (Validation 비율: {val_ratio * 100}%)")
+
+for cls in classes:
+    # 현재 클래스 폴더 경로 (예: dataset/bee)
+    src_dir = os.path.join(base_path, cls)
+    
+    # 소스 폴더가 없으면 건너뜀 (이미 실행했거나 폴더명이 틀린 경우)
+    if not os.path.exists(src_dir):
+        print(f"⚠️ 경고: '{src_dir}' 폴더를 찾을 수 없습니다. 건너뜁니다.")
+        continue
+
+    # 이미지 파일 리스트 가져오기
+    files = [f for f in os.listdir(src_dir) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+    random.shuffle(files) # 파일 순서 섞기
+
+    # 분할 지점 계산
+    split_idx = int(len(files) * val_ratio)
+    val_files = files[:split_idx]
+    train_files = files[split_idx:]
+
+    print(f"   📂 {cls}: 전체 {len(files)}장 -> Train {len(train_files)}장 / Val {len(val_files)}장")
+
+    # 2. 이동 함수 정의
+    def move_files(file_list, split_name):
+        dest_dir = os.path.join(base_path, split_name, cls)
+        os.makedirs(dest_dir, exist_ok=True) # 폴더가 없으면 생성
+        
+        for f in file_list:
+            shutil.move(os.path.join(src_dir, f), os.path.join(dest_dir, f))
+
+    # 3. 파일 이동 실행
+    move_files(val_files, "val")
+    move_files(train_files, "train")
+
+    # 4. 빈 원본 폴더 삭제 (dataset/bee 등)
+    try:
+        os.rmdir(src_dir)
+    except OSError:
+        print(f"   ℹ️ 알림: {src_dir} 폴더에 잔여 파일이 있어 삭제하지 않았습니다.")
+
+print("✅ 모든 작업 완료! 데이터셋이 Train/Val로 분리되었습니다.")
