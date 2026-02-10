@@ -1,5 +1,5 @@
 https://colab.research.google.com/drive/1ZkVLoXJQeVp8knVq5iqNzCuta2FHcPuR?usp=sharing
-- muffic vs 치와와 이미지 위조 공격
+- muffic vs 치와와 위조 이미지 생성
 
 https://colab.research.google.com/drive/1hTxwvSkf0mEdgElJxoKuxCSSWjm3FpeQ?usp=sharing
 - muffic vs 치와와 맞춰보기
