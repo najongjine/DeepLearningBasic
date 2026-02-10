@@ -1,2 +1,0 @@
-https://colab.research.google.com/drive/1A_6_NyfKSAS2Pjv_7PnE4FBSUIKMy_l-
-- 이미지 위조 공격
