@@ -1,2 +1,5 @@
 https://colab.research.google.com/drive/1Qr2-f6Z0cHEQtg789kB-Htv5oKiyripd?usp=sharing
 - EfficentNetV2-s 로 얼굴 맞추기 훈련
+
+https://colab.research.google.com/drive/1dKGKo9G4hm3Zmaoi3NgrGcC_FOZtIvkh?usp=sharing
+- EfficentNetV2-s 로 얼굴 맞추기 사용
