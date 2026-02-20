@@ -3,3 +3,10 @@ https://colab.research.google.com/drive/1Qr2-f6Z0cHEQtg789kB-Htv5oKiyripd?usp=sh
 
 https://colab.research.google.com/drive/1dKGKo9G4hm3Zmaoi3NgrGcC_FOZtIvkh?usp=sharing
 - EfficentNetV2-s 로 얼굴 맞추기 사용
+
+
+https://colab.research.google.com/drive/1p4-we0ANL7a9LnqWV7jiRVoi0jGhl74e?usp=sharing
+- insightface+adaface train
+
+https://colab.research.google.com/drive/1sDSYOG63-eleGZ9B1MMgOvth5p1Mnhtr?usp=sharing
+- insightface+adaface use
