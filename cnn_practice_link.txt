@@ -5,3 +5,9 @@ https://colab.research.google.com/drive/1Nd8ULsTJrB0JLqd89DZJLPVPsWBSNbEE?usp=sh
 
 https://colab.research.google.com/drive/1hTxwvSkf0mEdgElJxoKuxCSSWjm3FpeQ?usp=sharing
 - efficentnet use
+
+https://colab.research.google.com/drive/1A_6_NyfKSAS2Pjv_7PnE4FBSUIKMy_l-?usp=sharing
+- FGSM(적대적 이미지) 생성 코드
+
+https://colab.research.google.com/drive/11HlTYV-7DuXOuh87dv2viMDlmeWx4wjo?usp=sharing
+- FGSM 방어 모델 훈련 코드
