@@ -12,3 +12,12 @@ https://gall.dcinside.com/mgallery/board/view/?id=thesingularity&no=952870&excep
 
 https://gall.dcinside.com/mgallery/board/view/?id=thesingularity&no=946880&exception_mode=recommend&search_pos=-943032&s_type=search_subject&s_keyword=%EB%A7%8C%ED%99%94&page=1
 - 양자화 기법들을 알아보자
+
+https://gall.dcinside.com/mgallery/board/view/?id=thesingularity&no=948595&exception_mode=recommend&search_pos=-941184&s_type=search_subject_memo&s_keyword=%EB%A7%8C%ED%99%94&page=1
+- AI의 역사와 현재 : 장편 학습만화 가능성 테스트
+
+https://gall.dcinside.com/mgallery/board/view/?id=thesingularity&no=1021644&exception_mode=recommend&search_pos=-1011184&s_type=search_subject_memo&s_keyword=%EB%A7%8C%ED%99%94&page=1
+- 얀 르쿤 논문 만화 : 의미론적 관형(튜브형) 예측
+
+https://gall.dcinside.com/mgallery/board/view/?id=thesingularity&no=944616&exception_mode=recommend&search_pos=-941184&s_type=search_subject_memo&s_keyword=%EB%A7%8C%ED%99%94&page=1
+- GEval에 대해서 알아보자
