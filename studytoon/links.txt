@@ -30,3 +30,6 @@ https://gall.dcinside.com/mgallery/board/view/?id=thesingularity&no=956890&excep
 
 https://gall.dcinside.com/mgallery/board/view/?id=thesingularity&no=956890&exception_mode=recommend&page=1
 - 지능적인 AI 위임 (딥마인드)
+
+https://gall.dcinside.com/mgallery/board/view/?id=thesingularity&no=1146160&exception_mode=recommend&page=1
+- AI학습만화 1화_ 무료AI vs. 유료AI
